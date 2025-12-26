@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>For Nitika</title>
+<style>
+/* BODY & BACKGROUND */
+body {
+  margin: 0;
+  height: 100vh;
+  font-family: Georgia, serif;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #f6c1cc, #ffd6df);
+  position: relative;
+  cursor: default;
+}
+
+/* BACKGROUND SHAPES */
+.bg-shape {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 192, 203, 0.2);
+  animation: floatShape 15s linear infinite;
+}
+@keyframes floatShape {
+  0% { transform: translate(0,0) rotate(0deg); }
+  50% { transform: translate(80vw, 80vh) rotate(180deg); }
+  100% { transform: translate(0,0) rotate(360deg); }
+}
+
+/* LOCK SCREEN */
+#lock {
+  text-align: center;
+  background: rgba(255,255,255,0.35);
+  padding: 40px;
+  border-radius: 20px;
+}
+
+input {
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+}
+
+button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  border-radius: 12px;
+  border: none;
+  background: #f2a7b8;
+  color: white;
+  cursor: pointer;
+}
+
+/* ENVELOPE */
+#envelope {
+  width: 320px;
+  height: 200px;
+  background: #f2a7b8;
+  border-radius: 10px;
+  position: relative;
+  cursor: pointer;
+  display: none;
+  transition: transform 0.3s ease;
+}
+#envelope::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #f8c5d0;
+  clip-path: polygon(0 0, 50% 60%, 100% 0);
+}
+#envelope.wiggle { animation: wiggle 1s infinite; }
+@keyframes wiggle {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(2deg); }
+  50% { transform: rotate(-2deg); }
+  75% { transform: rotate(2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* LETTER */
+#letter {
+  position: absolute;
+  width: 90%;
+  max-width: 400px;
+  background: #fff3f6;
+  padding: 30px;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  text-align: center;
+  transform: scale(0);
+  transition: 0.8s ease;
+  overflow: hidden;
+}
+#letter.open { transform: scale(1); }
+
+h1 { color: #d16c8f; }
+p { color: #6b3a4a; line-height: 1.6; }
+
+/* ROMANTIC NOTES */
+.note, .response {
+  opacity: 0;
+  color: #d16c8f;
+  margin-top: 10px;
+  font-size: 1em;
+  transition: opacity 1.5s ease;
+  font-style: italic;
+}
+
+/* I LOVE YOU CONFESSION */
+#confession { margin-top: 20px; }
+.confess-btn, #giftBtn, #sendMessageBtn {
+  background: #f2a7b8;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  margin: 10px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: transform 0.3s;
+}
+.confess-btn:hover, #giftBtn:hover, #sendMessageBtn:hover { transform: scale(1.1); }
+
+/* MESSAGE INPUT */
+#messageInput {
+  margin-top: 10px;
+  padding: 8px;
+  width: 70%;
+  border-radius: 10px;
+  border: 1px solid #d16c8f;
+}
+
+/* FLOATING HEARTS */
+.heart {
+  position: absolute;
+  bottom: -20px;
+  color: rgba(255,105,180,0.6);
+  font-size: 20px;
+  animation: floatUp 6s linear infinite;
+}
+@keyframes floatUp { from {transform: translateY(0); opacity:1;} to {transform: translateY(-100vh); opacity:0;} }
+
+/* GIFT ANIMATION */
+.gift {
+  position: absolute;
+  font-size: 28px;
+  animation: floatGift 3s ease forwards;
+}
+@keyframes floatGift {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-200px) scale(1.5); opacity: 0; }
+}
+</style>
+</head>
+<body>
+
+<audio id="music" loop>
+  <source src="music.mp3" type="audio/mpeg">
+</audio>
+
+<!-- LOCK -->
+<div id="lock">
+  <h2>For Nitika 🤍</h2>
+  <p>Password</p>
+  <input type="password" id="pass">
+  <br>
+  <button onclick="unlock()">Open</button>
+</div>
+
+<!-- ENVELOPE -->
+<div id="envelope" onclick="openLetter()"></div>
+
+<!-- LETTER -->
+<div id="letter">
+  <h1>Hi Nitika ✨</h1>
+  <p>You are always in my thoughts, making every day brighter.</p>
+
+  <!-- Romantic notes -->
+  <div id="notesContainer"></div>
+
+  <!-- I LOVE YOU CONFESSION -->
+  <div id="confession">
+    <p>I have something to confess ❤️</p>
+    <button class="confess-btn" onclick="pickYes()">Yes</button>
+    <button class="confess-btn" onclick="pickNo(this)">No</button>
+
+    <!-- Message Input -->
+    <br>
+    <input type="text" id="messageInput" placeholder="Write a message to me...">
+    <button id="sendMessageBtn" onclick="sendMessage()">Send</button>
+  </div>
+
+  <!-- Container for messages -->
+  <div id="responsesContainer"></div>
+
+  <!-- Gift Button -->
+  <div>
+    <button id="giftBtn" onclick="sendGift()">Send a Hug / Gift 🍫👟💖</button>
+  </div>
+</div>
+
+<script>
+// BACKGROUND SHAPES
+for(let i=0;i<15;i++){
+  const shape=document.createElement("div");
+  shape.className="bg-shape";
+  shape.style.top=Math.random()*100+"vh";
+  shape.style.left=Math.random()*100+"vw";
+  shape.style.width=30+Math.random()*40+"px";
+  shape.style.height=shape.style.width;
+  document.body.appendChild(shape);
+}
+
+// FALLING PETALS
+for(let i=0;i<25;i++){
+  const petal=document.createElement("div");
+  petal.className="petal";
+  petal.style.left=Math.random()*100+"vw";
+  petal.style.animationDuration=5+Math.random()*5+"s";
+  document.body.appendChild(petal);
+}
+
+// PASSWORD
+function unlock(){
+  if(document.getElementById("pass").value.toLowerCase()==="nitika"){
+    document.getElementById("lock").style.display="none";
+    document.getElementById("envelope").style.display="block";
+  }else{ alert("Wrong password 🤍"); }
+}
+
+// OPEN LETTER
+function openLetter(){
+  const letter=document.getElementById("letter");
+  letter.classList.add("open");
+  const music=document.getElementById("music");
+  music.play().catch(()=>console.log("Music blocked"));
+
+  // Romantic notes
+  const notes=["Thinking of you always 💗","You make my days brighter ☀️","Forever grateful for you ✨","You are my happiness 💖"];
+  const container=document.getElementById("notesContainer");
+  notes.forEach((text,index)=>{
+    const p=document.createElement("p");
+    p.className="note";
+    p.innerText=text;
+    container.appendChild(p);
+    setTimeout(()=>{p.style.opacity=1;},index*1500);
+  });
+}
+
+// FLOATING HEARTS
+setInterval(()=>{
+  const h=document.createElement("div");
+  h.className="heart";
+  h.innerHTML="❤";
+  h.style.left=Math.random()*100+"vw";
+  document.body.appendChild(h);
+  setTimeout(()=>h.remove(),6000);
+},500);
+
+// CONFESSION BUTTONS
+function pickYes(){ alert("❤️ I knew you felt the same! I LOVE YOU forever!"); }
+function pickNo(btn){
+  btn.style.transform="translateX(-10px)";
+  setTimeout(()=>{btn.style.transform="translateX(10px)";},100);
+  setTimeout(()=>{btn.style.transform="translateX(0)";},200);
+}
+
+// GIFT FUNCTION
+function sendGift(){
+  for(let i=0;i<5;i++){
+    const gift=document.createElement("div");
+    gift.className="gift";
+    gift.innerText="🍫👟💖";
+    gift.style.left=Math.random()*80+"vw";
+    gift.style.top="70%";
+    document.body.appendChild(gift);
+    setTimeout(()=>gift.remove(),3000);
+  }
+}
+
+// SEND MESSAGE FUNCTION (remains in website)
+function sendMessage(){
+  const msg=document.getElementById("messageInput").value.trim();
+  if(msg!==""){
+    const container=document.getElementById("responsesContainer");
+    const p=document.createElement("p");
+    p.className="response";
+    p.innerText="💌 Nitika: " + msg;
+    container.appendChild(p);
+    setTimeout(()=>{p.style.opacity=1;},100); // fade in
+    document.getElementById("messageInput").value="";
+  } else {
+    alert("Please write something first! 💖");
+  }
+}
+</script>
+</body>
+</html>
